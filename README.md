@@ -28,7 +28,7 @@ tools/                build_assets.py, build_single.py
 
 ## Mengubah isi
 - **Teks halaman**: `index.html` (hero, About, Biodata) dan `js/app.js` (layanan, skill, tools). Email: `CONFIG.email` di `js/app.js`.
-- **Proyek**: daftar `PJ` di `js/projects.js` (judul, tag, aksi klik, warna hover, teks hover).
+- **Proyek**: daftar `PROJECTS` di `js/projects.js` (judul, tag, warna hover, teks hover, isi dialog; `image: null` = dialog hanya teks).
 - **Timeline**: daftar `ST` di `js/timeline.js` (teks tiap tahap; yang masih `[kurung]` perlu diisi).
 - **Sertifikat / screenshot baru**:
   1. Taruh PDF di `assets/certificates/` beserta pratinjau JPG halaman 1 dengan nama yang sama
