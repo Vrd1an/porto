@@ -1,0 +1,14 @@
+{
+  "name": "portfolio-ferdian",
+  "private": true,
+  "description": "Portofolio web designer: ID card 3D, intro, liquid glass navbar.",
+  "scripts": {
+    "build:card": "esbuild js/card3d.src.js --bundle --minify --format=iife --outfile=js/card3d.bundle.js",
+    "build:assets": "python3 tools/build_assets.py",
+    "build:single": "python3 tools/build_single.py"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "three": "0.157.0"
+  }
+}
