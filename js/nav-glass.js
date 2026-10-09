@@ -9,7 +9,7 @@
     ua = navigator.userAgent;
   if (!nav || !fe) return;
   if (/Chrome|Chromium|Edg/.test(ua) && !/Firefox/.test(ua))
-    nav.style.backdropFilter = 'url(#nvf) blur(2px) saturate(1.6) brightness(1.05)';
+    nav.style.backdropFilter = 'url(#nvf) blur(2px) saturate(1.3) brightness(1.05)';
   var last = '';
   // Edge-refraction map for the navbar (neutral in the middle, strong at top/bottom edges).
   function map() {

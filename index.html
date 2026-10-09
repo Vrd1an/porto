@@ -15,38 +15,6 @@
   <body>
     <svg width="0" height="0" style="position: absolute" aria-hidden="true">
       <defs>
-        <filter id="lgf" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-          <feImage id="lgm" x="0" y="0" width="120" height="46" preserveAspectRatio="none" result="m" />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="m"
-            scale="30"
-            xChannelSelector="R"
-            yChannelSelector="G"
-            result="dr"
-          />
-          <feColorMatrix in="dr" type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" result="r" />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="m"
-            scale="34"
-            xChannelSelector="R"
-            yChannelSelector="G"
-            result="dg"
-          />
-          <feColorMatrix in="dg" type="matrix" values="0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0" result="g" />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="m"
-            scale="38"
-            xChannelSelector="R"
-            yChannelSelector="G"
-            result="db"
-          />
-          <feColorMatrix in="db" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0" result="b" />
-          <feBlend in="r" in2="g" mode="screen" result="rg" />
-          <feBlend in="rg" in2="b" mode="screen" />
-        </filter>
         <filter id="wv" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
           <feFlood flood-color="rgb(128,128,128)" result="n" />
           <feImage id="wvi" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="rg" />
@@ -63,35 +31,29 @@
             yChannelSelector="G"
           />
         </filter>
+        <filter id="lgf" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+          <feImage id="lgm" x="0" y="0" width="120" height="46" preserveAspectRatio="none" result="m" />
+          <!-- chromatic glitch: each colour channel is displaced by a slightly different amount -->
+          <feDisplacementMap in="SourceGraphic" in2="m" scale="30" xChannelSelector="R" yChannelSelector="G" result="dr" />
+          <feColorMatrix in="dr" type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" result="r" />
+          <feDisplacementMap in="SourceGraphic" in2="m" scale="34" xChannelSelector="R" yChannelSelector="G" result="dg" />
+          <feColorMatrix in="dg" type="matrix" values="0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0" result="g" />
+          <feDisplacementMap in="SourceGraphic" in2="m" scale="38" xChannelSelector="R" yChannelSelector="G" result="db" />
+          <feColorMatrix in="db" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0" result="b" />
+          <feBlend in="r" in2="g" mode="screen" result="rg" />
+          <feBlend in="rg" in2="b" mode="screen" />
+        </filter>
         <filter id="nvf" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
           <feImage id="nvm" x="0" y="0" width="1200" height="65" preserveAspectRatio="none" result="m" />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="m"
-            scale="22"
-            xChannelSelector="R"
-            yChannelSelector="G"
-            result="dr"
-          />
-          <feColorMatrix in="dr" type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" result="r" />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="m"
-            scale="26"
-            xChannelSelector="R"
-            yChannelSelector="G"
-            result="dg"
-          />
-          <feColorMatrix in="dg" type="matrix" values="0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0" result="g" />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="m"
-            scale="30"
-            xChannelSelector="R"
-            yChannelSelector="G"
-            result="db"
-          />
-          <feColorMatrix in="db" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0" result="b" />
+          <!-- soften the backdrop first, so the displacement does not turn text edges into jagged pixels -->
+          <feGaussianBlur in="SourceGraphic" stdDeviation="0.4" result="sb" />
+          <feDisplacementMap in="sb" in2="m" scale="26" xChannelSelector="R" yChannelSelector="G" result="d" />
+          <!-- slight colour fringe: red and blue shifted a fraction of a pixel in opposite directions (smooth, no speckles) -->
+          <feColorMatrix in="d" type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" result="r0" />
+          <feOffset in="r0" dx="-0.6" dy="0" result="r" />
+          <feColorMatrix in="d" type="matrix" values="0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0" result="g" />
+          <feColorMatrix in="d" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0" result="b0" />
+          <feOffset in="b0" dx="0.6" dy="0" result="b" />
           <feBlend in="r" in2="g" mode="screen" result="rg" />
           <feBlend in="rg" in2="b" mode="screen" />
         </filter>
@@ -276,7 +238,7 @@
     <script src="js/assets-data.js"></script>
     <script src="js/certificates.js"></script>
     <script src="js/projects.js"></script>
-    <script src="js/timeline.js"></script>
+    <script src="js/experience.js"></script>
     <script src="js/nav-lens.js"></script>
     <script src="js/nav-glass.js"></script>
     <script src="js/intro.js"></script>

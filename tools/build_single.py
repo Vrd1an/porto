@@ -5,6 +5,8 @@
 
 Useful for hosts that only accept a single HTML file.
 """
+import base64
+import mimetypes
 import pathlib
 import re
 
@@ -17,8 +19,18 @@ def main():
     def inline_css(match):
         return "<style>\n" + (ROOT / match.group(1)).read_text(encoding="utf-8") + "\n</style>"
 
+    def embed_images(code):
+        """'assets/..jpg' paths in JS (e.g. timeline photos) -> data URIs, so one file is enough."""
+        def repl(m):
+            f = ROOT / m.group(2)
+            if not f.is_file():
+                return m.group(0)
+            mime = mimetypes.guess_type(f.name)[0] or "image/jpeg"
+            return m.group(1) + "data:" + mime + ";base64," + base64.b64encode(f.read_bytes()).decode() + m.group(1)
+        return re.sub(r"(['\"])(assets/[^'\"]+\.(?:jpe?g|png|webp|gif))\1", repl, code)
+
     def inline_js(match):
-        code = (ROOT / match.group(1)).read_text(encoding="utf-8").replace("</script", "<\\/script")
+        code = embed_images((ROOT / match.group(1)).read_text(encoding="utf-8")).replace("</script", "<\\/script")
         return "<script>\n" + code + "\n</script>"
 
     html = re.sub(r'<link rel="stylesheet" href="([^"]+)"\s*/?>', inline_css, html)

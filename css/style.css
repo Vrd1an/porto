@@ -102,10 +102,11 @@ nav .ls a {
   transition: color 0.35s;
 }
 nav .ls a.on {
+  cursor: grab;
   color: var(--tx);
 }
 
-/* ===== Liquid-glass lens (active navbar link) ===== */
+/* ===== Liquid-glass lens (active navbar link; see js/nav-lens.js) ===== */
 .lens {
   position: absolute;
   left: 0;
@@ -123,18 +124,12 @@ nav .ls a.on {
     -5px 12px 18px -5px rgba(15, 15, 55, 0.35);
 }
 .lens:before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
   padding: 1.5px;
-  background: linear-gradient(
-    140deg,
-    #fff,
-    rgba(255, 255, 255, 0.06) 38%,
-    rgba(255, 255, 255, 0.06) 62%,
-    rgba(255, 255, 255, 0.85)
-  );
+  background: linear-gradient(140deg, #fff, rgba(255, 255, 255, 0.06) 38%, rgba(255, 255, 255, 0.06) 62%, rgba(255, 255, 255, 0.85));
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -475,125 +470,263 @@ footer {
   min-height: 1em;
 }
 
-/* ===== Timeline ===== */
-.tlw {
+/* ===== Experience: pinned text + 3D vertical photo carousel (js/experience.js) ===== */
+.xs {
   position: relative;
+  margin-top: 30px;
 }
-.tlc {
-  position: relative;
+.xs-stage {
+  position: sticky;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 40px;
+  align-items: center;
+  /* no overflow clipping: the photos fade out near the top/bottom instead (see render() in experience.js),
+     so nothing gets a hard cut-off edge */
 }
-.tle {
-  font:
-    700 11px "Plus Jakarta Sans",
-    sans-serif;
-  letter-spacing: 0.18em;
+.xs-info {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 0 0 0 6px;
 }
-.tc {
-  position: absolute;
-  width: 176px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--card) 68%, transparent);
-  border: 1px solid var(--ln);
-  color: var(--tx);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  opacity: 0;
-  transform: translateY(8px);
+.xs-body.in {
+  animation: xs-in 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-.play .tc {
-  animation:
-    cin 0.7s ease var(--d) forwards,
-    flt 6s ease-in-out calc(var(--d) + 0.8s) infinite;
-}
-@keyframes cin {
-  to {
-    opacity: 1;
-    transform: none;
+@keyframes xs-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
   }
 }
-.tc small {
-  display: block;
-  color: var(--ac);
-  font-size: 11.5px;
+.xs-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 12.5px;
+}
+.xs-cat {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  color: var(--hue);
+  background: color-mix(in srgb, var(--hue) 14%, transparent);
+}
+.xs-year {
+  color: var(--mut);
   font-weight: 600;
 }
-.tc b {
-  display: block;
-  font-size: 15px;
-  margin: 1px 0 3px;
+.xs-body h3,
+.xs-plain h3 {
+  margin: 0 0 4px;
+  font-size: clamp(22px, 2.6vw, 30px);
+  line-height: 1.2;
 }
-.tc p {
+.xs-sub {
+  margin: 0 0 12px;
+  font-weight: 600;
+  color: var(--hue);
+}
+.xs-sub[hidden] {
+  display: none;
+}
+.xs-text {
   margin: 0;
-  font-size: 12.5px;
-  line-height: 1.5;
   color: var(--mut);
 }
-.tlh {
-  display: none;
+.xs-count {
+  margin: 14px 0 0;
   font-size: 13px;
-  margin: 10px 0 0;
-  text-align: center;
+  font-weight: 600;
+  color: var(--mut);
 }
-@media (max-width: 1100px) {
-  .tlh {
-    display: block;
-  }
+.xs-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.lens:after {
-  content: "";
+.xs-steps button {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--ln);
+  background: transparent;
+  color: var(--mut);
+  font: 600 12.5px 'Plus Jakarta Sans', system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 0.3s, border-color 0.3s, background 0.3s;
+}
+.xs-steps button:hover,
+.xs-steps button.on {
+  border-color: var(--hue);
+  color: var(--hue);
+}
+.xs-steps button.on {
+  background: color-mix(in srgb, var(--hue) 12%, transparent);
+}
+.xs-3d {
+  position: relative;
+  height: 100%;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y; /* a finger scrolls the page; the mouse drags the carousel */
+  perspective: 1100px;
+  perspective-origin: 50% 50%;
+}
+.xs-3d::before {
+  /* soft coloured glow behind the photos; an ellipse that fades out exactly at the box edges */
+  content: '';
   position: absolute;
   inset: 0;
-  border-radius: inherit;
-  background:
-    radial-gradient(
-      90% 120% at 14% 0%,
-      rgba(255, 255, 255, 0.5),
-      rgba(255, 255, 255, 0) 46%
-    ),
-    linear-gradient(0deg, rgba(255, 255, 255, 0.14), transparent 40%);
+  pointer-events: none;
+  background: radial-gradient(ellipse closest-side at 50% 50%, color-mix(in srgb, var(--hue, var(--ac)) 20%, transparent), transparent);
 }
-.tlk {
+.xs-3d.drag,
+.xs-3d.drag * {
+  cursor: grabbing !important;
+}
+.xs-track {
+  position: absolute;
+  inset: 0;
+}
+.xs-slide {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(470px, 90%);
+  height: min(300px, 60%);
+  margin: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--hue) 45%, var(--ln));
+  background: var(--card);
+  box-shadow: 0 24px 50px -24px rgba(10, 10, 40, 0.45);
+  backface-visibility: hidden;
+  cursor: pointer;
+  will-change: transform, opacity;
+}
+.xs-slide.cur {
+  box-shadow: 0 34px 70px -26px color-mix(in srgb, var(--hue) 70%, transparent), 0 0 0 1px color-mix(in srgb, var(--hue) 60%, transparent);
+}
+.xs-slide.cur:not(:has(.xs-ph)) {
+  cursor: zoom-in;
+}
+.xs-slide .xs-bg {
+  position: absolute;
+  inset: -12%;
+  width: 124%;
+  height: 124%;
+  object-fit: cover;
+  filter: blur(18px) brightness(0.72) saturate(1.2);
+}
+.xs-slide .xs-fg {
+  position: relative;
+  object-fit: contain;
+}
+.xs-slide img {
+  -webkit-user-drag: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.xs-slide figcaption {
   position: absolute;
   left: 0;
-  top: 0;
-  pointer-events: none;
+  right: 0;
+  bottom: 0;
+  padding: 24px 16px 12px;
+  color: #fff;
+  font-size: 13px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.65));
 }
-#tlg {
-  filter: blur(7px) saturate(1.4);
+.xs-ph {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px;
+  height: 100%;
+  padding: 24px;
+  color: #fff;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--hue) 70%, #0b1020), color-mix(in srgb, var(--hue) 25%, #0b1020));
 }
-#hz {
+.xs-ph span {
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0.85;
+}
+.xs-ph b {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.xs-ph i {
+  font-size: 14px;
+  font-style: normal;
+  opacity: 0.85;
+}
+.xs-hint {
   position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    38% 28% at 50% 50%,
-    color-mix(in srgb, var(--ac) 22%, transparent),
-    transparent 70%
-  );
-  animation: hz 5s ease-in-out infinite;
-}
-@keyframes hz {
-  50% {
-    opacity: 0.4;
-    transform: scale(1.08);
-  }
-}
-@keyframes flt {
-  50% {
-    transform: translateY(-4px);
-  }
-}
-.tlc .tle {
-  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
   color: var(--mut);
-  opacity: 0.8;
+  transition: opacity 0.3s;
 }
-.js-intro #pg {
-  height: 100vh;
-  overflow: hidden;
+.xs-plain {
+  display: grid;
+  gap: 22px;
+  margin-top: 30px;
 }
-#pg.wv {
-  filter: url(#wv);
+.xs-plain article {
+  padding: 22px;
+  border-radius: 18px;
+  background: var(--card);
+  border: 1px solid var(--ln);
+}
+.xs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+.xs-grid .xs-slide {
+  position: relative;
+  left: auto;
+  top: auto;
+  width: auto;
+  height: 110px;
+  border-radius: 10px;
+  box-shadow: none;
+}
+@media (max-width: 799px) {
+  .xs-stage {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+  .xs-3d {
+    order: -1;
+  }
+  .xs-slide {
+    height: min(230px, 68%);
+  }
+  .xs-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 14px;
+  }
+  .xs-info {
+    gap: 10px;
+    padding: 0 4px 8px;
+  }
 }
 
 /* ===== Project cards + dialog ===== */
@@ -651,6 +784,17 @@ footer {
   letter-spacing: 0.08em;
   opacity: 0.6;
 }
+.pjn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
 .pjo {
   position: absolute;
   inset: 0;
@@ -674,7 +818,8 @@ footer {
 .pj:focus-visible .pjo {
   opacity: 1;
 }
-#pm {
+#pm,
+#tm {
   position: fixed;
   inset: 0;
   z-index: 90;
@@ -685,7 +830,8 @@ footer {
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
-#pm[hidden] {
+#pm[hidden],
+#tm[hidden] {
   display: none;
 }
 .pmp {
@@ -713,6 +859,7 @@ footer {
   width: min(900px, 100%);
 }
 .pmi {
+  position: relative;
   margin-bottom: 20px;
   border-radius: 12px;
   overflow: hidden;
@@ -739,17 +886,104 @@ footer {
   display: none;
 }
 
-/* Reduced motion: no smooth scrolling, no timeline animation */
+/* Reduced motion: no smooth scrolling (the experience section becomes a plain list in js/experience.js) */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
-  #hz {
-    animation: none;
-  }
-  .tc {
-    opacity: 1 !important;
-    transform: none !important;
-    animation: none !important;
-  }
+}
+
+/* ===== Photo gallery inside the timeline dialog ===== */
+.gb {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+.gb:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+.gp {
+  left: 10px;
+}
+.gn {
+  right: 10px;
+}
+.gb[hidden],
+.gc[hidden] {
+  display: none;
+}
+.gc {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+.gcap {
+  margin: -8px 0 14px;
+  font-size: 13px;
+  color: var(--mut);
+}
+.gt {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.gt button {
+  width: 64px;
+  height: 44px;
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  opacity: 0.6;
+  cursor: pointer;
+  background: none;
+}
+.gt button.on {
+  border-color: var(--ac);
+  opacity: 1;
+}
+.gt img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pmp .tsub {
+  margin: -4px 0 12px;
+  font-weight: 600;
+  color: var(--tx);
+}
+.pmp .tsub[hidden] {
+  display: none;
+}
+
+/* Navbar lens can be dragged (js/nav-lens.js) */
+nav .ls {
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+}
+nav .ls a.on {
+  cursor: grab;
+}
+nav .ls.sliding,
+nav .ls.sliding a {
+  cursor: grabbing;
 }

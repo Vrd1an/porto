@@ -29,6 +29,8 @@ CERTIFICATES = [
 PROJECTS = {
     "sig": "projects/sig-tps.jpg",
     "portfolio": "projects/portfolio.jpg",
+    "lms-guru": "projects/lms-guru.jpg",
+    "lms-siswa": "projects/lms-siswa.jpg",
 }
 
 

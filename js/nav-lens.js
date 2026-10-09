@@ -1,7 +1,9 @@
 /*
  * nav-lens.js - the liquid-glass lens that slides between navbar buttons.
- * - map(): builds the displacement map (a convex bulge) used by the SVG filter #lgf.
+ * - map(): builds the displacement map used by the SVG filter #lgf (a convex bulge); the filter splits the
+ *   red/green/blue channels slightly, which gives the chromatic glitch fringes of the glass.
  * - go(): moves the lens with a stretch/squash animation; spy(): follows the scroll position.
+ * - the lens can also be dragged by hand: it follows the cursor, then settles on the nearest button.
  * Refraction needs a Chromium browser; other browsers fall back to a plain blurred glass.
  */
 (function () {
@@ -21,7 +23,10 @@
   ls.appendChild(ind);
   if (/Chrome|Chromium|Edg/.test(ua) && !/Firefox/.test(ua))
     ind.style.backdropFilter = 'url(#lgf) blur(.4px) saturate(1.7) brightness(1.08)';
-  // Displacement map for the lens: magnifies the middle, bends the edges.
+
+  // Displacement map for the lens: a convex bulge. The middle is enlarged and the sides bend strongly, like a
+  // glass ball. The SVG filter #lgf (index.html) bends the red, green and blue channels by slightly different
+  // amounts, which gives the chromatic "glitch" fringes.
   function map(w, h) {
     var c = document.createElement('canvas');
     c.width = w;
@@ -104,6 +109,84 @@
       go(i, true);
     });
   });
+  // Slide the lens by hand: press on the buttons and drag; on release it settles on the nearest button
+  // and the page scrolls to that section (the lens stretches while it moves, like liquid).
+  var suppressUntil = 0;
+  function nearest(cx) {
+    var best = 0,
+      bd = Infinity;
+    links.forEach(function (a, i) {
+      var b = box(i),
+        d = Math.abs(b.x + b.w / 2 - cx);
+      if (d < bd) {
+        bd = d;
+        best = i;
+      }
+    });
+    return best;
+  }
+  ls.addEventListener('dragstart', function (e) {
+    e.preventDefault(); // links must not start a native drag
+  });
+  ls.addEventListener('pointerdown', function (e) {
+    if (e.button !== 0 || !g) return;
+    var startX = e.clientX,
+      start = { x: g.x, y: g.y, w: g.w, h: g.h },
+      x = start.x,
+      started = false;
+    var first = box(0),
+      last = box(links.length - 1);
+    var minX = first.x,
+      maxX = last.x + last.w - start.w;
+    function move(ev) {
+      var dx = ev.clientX - startX;
+      if (!started) {
+        if (Math.abs(dx) < 4) return; // small movements are still a click
+        started = true;
+        lock = Date.now() + 60000; // keep the scroll spy away while dragging
+        ls.classList.add('sliding');
+        if (ind.getAnimations)
+          ind.getAnimations().forEach(function (an) {
+            an.cancel();
+          });
+      }
+      var nx = Math.min(maxX, Math.max(minX, start.x + dx)),
+        v = nx - x;
+      x = nx;
+      ind.style.transform =
+        'translate(' + x + 'px,' + start.y + 'px) scale(' +
+        (1 + Math.min(0.28, Math.abs(v) / 40)) + ',' + (1 - Math.min(0.12, Math.abs(v) / 90)) + ')';
+      var idx = nearest(x + start.w / 2);
+      links.forEach(function (a, k) {
+        a.classList.toggle('on', k === idx);
+      });
+    }
+    function up() {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      ls.classList.remove('sliding');
+      if (!started) return;
+      var idx = nearest(x + start.w / 2);
+      g = { x: x, y: start.y, w: start.w, h: start.h }; // animate from where the lens was released
+      cur = -2;
+      links[idx].click(); // go() + scroll to the section
+      suppressUntil = performance.now() + 60; // ...and ignore the click that the browser sends after a drag
+    }
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+  });
+  ls.addEventListener(
+    'click',
+    function (e) {
+      if (performance.now() < suppressUntil) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    },
+    true,
+  );
   // Scroll spy: highlight the link of the section currently in view.
   function spy() {
     if (Date.now() < lock) return;
